@@ -21,7 +21,7 @@
       elevation="2"
     >
       <img width="17" class="google-auth-icon" src="../assets/googleLogo.png" />
-      Sign In To Save
+      Clear Localstorage (Reset App)
     </v-btn>
     <v-dialog v-model="dialog" max-width="800" persistent>
       <div class="confirm-popup">
@@ -69,62 +69,8 @@ export default {
       "loadCourseSelectionFromFirestore"
     ]),
     googleSignIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase
-        .auth()
-        .signInWithPopup(provider)
-        .then(authData => {
-          const user = authData.user;
-          if (user) {
-            // Store user in Vuex state
-            this.setUser(user);
-            // Load user data
-            firebase
-              .firestore()
-              .collection("users")
-              .doc(user.uid)
-              .get()
-              .then(doc => {
-                const userData = doc.data();
-                if (
-                  !userData ||
-                  !userData.coursesJSON ||
-                  !userData.courseSelectionJSON
-                ) {
-                  return;
-                }
-                this.coursesModule = JSON.parse(userData.coursesJSON);
-                this.courseSelectionModule = JSON.parse(
-                  userData.courseSelectionJSON
-                );
-                const planChanged = !this.plansMatch();
-                if (
-                  planChanged &&
-                  this.majorRequirements.length > 0 &&
-                  this.coursesModule.majorRequirements.length > 0
-                ) {
-                  this.dialog = true;
-                  return;
-                } else if (
-                  planChanged &&
-                  this.coursesModule.majorRequirements.length > 0
-                ) {
-                  this.loadPlan();
-                  if (this.$route.name !== "CourseSelection") {
-                    this.$router.push("/CourseSelection");
-                  }
-                } else {
-                  this.updateFirestore();
-                }
-                this.updateChecklist();
-              });
-          } else {
-            this.clearUser();
-          }
-        })
-        .catch(err => {
-          console.error(err);
-        });
+      // Clear localstorage
+      localStorage.clear();
     },
     loadPlan() {
       this.loadCoursesFromFireStore(this.coursesModule);
